@@ -25,7 +25,7 @@ public class EventRecord {
     private LocalDate eventDate;
 
     @Column(nullable = false)
-    private double basePrice;
+    private Double basePrice;
 
     @Column(nullable = false)
     private boolean active;
