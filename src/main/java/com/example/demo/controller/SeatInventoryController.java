@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.SeatInventoryRecord;
+import com.example.demo.model.SeatInventoryRecord;
 import com.example.demo.service.SeatInventoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

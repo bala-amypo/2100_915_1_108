@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.PricingRule;
+import com.example.demo.model.PricingRule;
 import com.example.demo.service.PricingRuleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

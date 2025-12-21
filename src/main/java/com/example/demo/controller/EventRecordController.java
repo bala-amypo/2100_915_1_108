@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.EventRecord;
+import com.example.demo.model.EventRecord;
 import com.example.demo.service.EventRecordService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

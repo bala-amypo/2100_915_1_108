@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.PriceAdjustmentLog;
+import com.example.demo.model.PriceAdjustmentLog;
 import com.example.demo.service.PriceAdjustmentLogService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
