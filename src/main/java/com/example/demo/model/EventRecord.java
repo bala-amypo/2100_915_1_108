@@ -72,7 +72,7 @@ public class EventRecord {
         this.eventDate = eventDate;
     }
 
-    public double getBasePrice() {
+    public Double getBasePrice() {
         return basePrice;
     }
 
