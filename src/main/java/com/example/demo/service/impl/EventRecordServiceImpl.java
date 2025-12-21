@@ -1,7 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.exception.BadRequestException;
-import com.example.demo.entity.EventRecord;
+import com.example.demo.model.EventRecord;
 import com.example.demo.repository.EventRecordRepository;
 import com.example.demo.service.EventRecordService;
 import org.springframework.stereotype.Service;

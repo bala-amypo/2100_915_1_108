@@ -1,6 +1,6 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.PriceAdjustmentLog;
+import com.example.demo.model.PriceAdjustmentLog;
 import com.example.demo.repository.PriceAdjustmentLogRepository;
 import com.example.demo.service.PriceAdjustmentLogService;
 import org.springframework.stereotype.Service;
