@@ -15,4 +15,3 @@ public interface DynamicPricingEngineService {
 
     List<DynamicPriceRecord> getAllComputedPrices();
 }
-

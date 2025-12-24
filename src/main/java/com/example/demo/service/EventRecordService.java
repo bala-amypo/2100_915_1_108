@@ -17,4 +17,3 @@ public interface EventRecordService {
 
     EventRecord updateEventStatus(Long id, boolean active);
 }
-

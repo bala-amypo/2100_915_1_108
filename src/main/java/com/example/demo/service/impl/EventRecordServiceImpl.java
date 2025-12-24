@@ -12,45 +12,45 @@ import java.util.Optional;
 @Service
 public class EventRecordServiceImpl implements EventRecordService {
 
-    private final EventRecordRepository eventRecordRepository;
+    private final EventRecordRepository repository;
 
-    public EventRecordServiceImpl(EventRecordRepository eventRecordRepository) {
-        this.eventRecordRepository = eventRecordRepository;
+    public EventRecordServiceImpl(EventRecordRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public EventRecord createEvent(EventRecord event) {
-        if (eventRecordRepository.existsByEventCode(event.getEventCode())) {
+
+        if (repository.existsByEventCode(event.getEventCode())) {
             throw new BadRequestException("Event code already exists");
         }
+
         if (event.getBasePrice() == null || event.getBasePrice() <= 0) {
             throw new BadRequestException("Base price must be > 0");
         }
-        return eventRecordRepository.save(event);
+
+        return repository.save(event);
     }
 
     @Override
     public EventRecord getEventById(Long id) {
-        return eventRecordRepository.findById(id).orElse(null);
+        return repository.findById(id).orElseThrow();
     }
 
     @Override
     public Optional<EventRecord> getEventByCode(String eventCode) {
-        return eventRecordRepository.findByEventCode(eventCode);
+        return repository.findByEventCode(eventCode);
     }
 
     @Override
     public List<EventRecord> getAllEvents() {
-        return eventRecordRepository.findAll();
+        return repository.findAll();
     }
 
     @Override
     public EventRecord updateEventStatus(Long id, boolean active) {
         EventRecord event = getEventById(id);
-        if (event != null) {
-            event.setActive(active);
-            return eventRecordRepository.save(event);
-        }
-        return null;
+        event.setActive(active);
+        return repository.save(event);
     }
 }
