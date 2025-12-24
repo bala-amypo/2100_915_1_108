@@ -52,5 +52,4 @@ public class AuthController {
         return response;
     }
 }
-mvn dependency:purge-local-repository -DreResolve=true
-mvn clean install
+
