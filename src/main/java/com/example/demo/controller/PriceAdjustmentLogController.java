@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.model.PriceAdjustmentLog;
 import com.example.demo.service.PriceAdjustmentLogService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,24 +10,24 @@ import java.util.List;
 @RequestMapping("/api/price-adjustments")
 public class PriceAdjustmentLogController {
 
-    private final PriceAdjustmentLogService logService;
+    private final PriceAdjustmentLogService service;
 
-    public PriceAdjustmentLogController(PriceAdjustmentLogService logService) {
-        this.logService = logService;
+    public PriceAdjustmentLogController(PriceAdjustmentLogService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public ResponseEntity<PriceAdjustmentLog> createLog(@RequestBody PriceAdjustmentLog log) {
-        return ResponseEntity.ok(logService.logAdjustment(log));
+    public PriceAdjustmentLog create(@RequestBody PriceAdjustmentLog log) {
+        return service.logAdjustment(log);
     }
 
     @GetMapping("/event/{eventId}")
-    public ResponseEntity<List<PriceAdjustmentLog>> getLogsByEvent(@PathVariable Long eventId) {
-        return ResponseEntity.ok(logService.getAdjustmentsByEvent(eventId));
+    public List<PriceAdjustmentLog> byEvent(@PathVariable Long eventId) {
+        return service.getAdjustmentsByEvent(eventId);
     }
 
     @GetMapping
-    public ResponseEntity<List<PriceAdjustmentLog>> getAllLogs() {
-        return ResponseEntity.ok(logService.getAllAdjustments());
+    public List<PriceAdjustmentLog> getAll() {
+        return service.getAllAdjustments();
     }
 }
