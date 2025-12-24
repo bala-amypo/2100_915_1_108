@@ -7,8 +7,7 @@ import java.util.List;
 
 public interface PricingRuleRepository extends JpaRepository<PricingRule, Long> {
 
-    boolean existsByRuleCode(String ruleCode);
+    boolean existsByRuleCode(String code);
 
     List<PricingRule> findByActiveTrue();
 }
-

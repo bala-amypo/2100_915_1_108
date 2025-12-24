@@ -11,65 +11,43 @@ public class PriceAdjustmentLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private Long eventId;
-
-    @Column(nullable = false)
     private Double oldPrice;
-
-    @Column(nullable = false)
     private Double newPrice;
-
     private String reason;
 
-    @Column(nullable = false)
     private LocalDateTime changedAt;
-
-    public PriceAdjustmentLog() {}
 
     @PrePersist
     protected void onCreate() {
         this.changedAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    public PriceAdjustmentLog() {}
 
-    public Long getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Long eventId) {
+    public PriceAdjustmentLog(Long id, Long eventId,
+                              Double oldPrice, Double newPrice, String reason) {
+        this.id = id;
         this.eventId = eventId;
-    }
-
-    public Double getOldPrice() {
-        return oldPrice;
-    }
-
-    public void setOldPrice(Double oldPrice) {
         this.oldPrice = oldPrice;
-    }
-
-    public Double getNewPrice() {
-        return newPrice;
-    }
-
-    public void setNewPrice(Double newPrice) {
         this.newPrice = newPrice;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(String reason) {
         this.reason = reason;
     }
 
-    public LocalDateTime getChangedAt() {
-        return changedAt;
-    }
-}
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
+    public Long getEventId() { return eventId; }
+    public void setEventId(Long eventId) { this.eventId = eventId; }
+
+    public Double getOldPrice() { return oldPrice; }
+    public void setOldPrice(Double oldPrice) { this.oldPrice = oldPrice; }
+
+    public Double getNewPrice() { return newPrice; }
+    public void setNewPrice(Double newPrice) { this.newPrice = newPrice; }
+
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
+
+    public LocalDateTime getChangedAt() { return changedAt; }
+}
