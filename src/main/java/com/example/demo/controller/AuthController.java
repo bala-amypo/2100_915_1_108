@@ -1,12 +1,13 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
 import com.example.demo.model.User;
 import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -30,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
+    public Map<String, Object> login(@RequestBody User request) {
 
         User user = userService.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
@@ -42,7 +43,14 @@ public class AuthController {
         String token = jwtTokenProvider.generateToken(
                 user.getId(), user.getEmail(), user.getRole());
 
-        return new AuthResponse(token, user.getId(),
-                user.getEmail(), user.getRole());
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("userId", user.getId());
+        response.put("email", user.getEmail());
+        response.put("role", user.getRole());
+
+        return response;
     }
 }
+mvn dependency:purge-local-repository -DreResolve=true
+mvn clean install
