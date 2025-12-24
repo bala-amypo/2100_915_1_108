@@ -1,9 +1,10 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "seat_inventory")
+@Table(name = "seat_inventory_records")
 public class SeatInventoryRecord {
 
     @Id
@@ -11,37 +12,38 @@ public class SeatInventoryRecord {
     private Long id;
 
     private Long eventId;
-    private int totalSeats;
-    private int remainingSeats;
+    private Integer totalSeats;
+    private Integer remainingSeats;
+
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
     public SeatInventoryRecord() {}
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Long eventId) {
+    public SeatInventoryRecord(Long id, Long eventId,
+                               Integer totalSeats, Integer remainingSeats) {
+        this.id = id;
         this.eventId = eventId;
-    }
-
-    public int getTotalSeats() {
-        return totalSeats;
-    }
-
-    public void setTotalSeats(int totalSeats) {
         this.totalSeats = totalSeats;
-    }
-
-    public int getRemainingSeats() {
-        return remainingSeats;
-    }
-
-    public void setRemainingSeats(int remainingSeats) {
         this.remainingSeats = remainingSeats;
     }
-}
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Long getEventId() { return eventId; }
+    public void setEventId(Long eventId) { this.eventId = eventId; }
+
+    public Integer getTotalSeats() { return totalSeats; }
+    public void setTotalSeats(Integer totalSeats) { this.totalSeats = totalSeats; }
+
+    public Integer getRemainingSeats() { return remainingSeats; }
+    public void setRemainingSeats(Integer remainingSeats) { this.remainingSeats = remainingSeats; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+}
