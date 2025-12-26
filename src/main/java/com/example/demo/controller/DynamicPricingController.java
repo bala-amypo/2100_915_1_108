@@ -2,10 +2,10 @@ package com.example.demo.controller;
 
 import com.example.demo.model.DynamicPriceRecord;
 import com.example.demo.service.DynamicPricingEngineService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/pricing")
@@ -17,27 +17,42 @@ public class DynamicPricingController {
         this.service = service;
     }
 
-    // ✅ TEST-COMPATIBLE METHOD
+    // ✅ Compute new dynamic price
     @PostMapping("/compute/{eventId}")
-    public DynamicPriceRecord computePrice(
+    public ResponseEntity<DynamicPriceRecord> computePrice(
             @PathVariable Long eventId) {
 
-        return service.computeDynamicPrice(eventId);
+        DynamicPriceRecord price =
+                service.computeDynamicPrice(eventId);
+
+        return ResponseEntity.ok(price);
     }
 
-    // ✅ GET PRICE HISTORY (TEST EXPECTS THIS)
-    @GetMapping("/history/{eventId}")
-    public List<DynamicPriceRecord> getPriceHistory(
-            @PathVariable Long eventId) {
-
-        return service.getPriceHistory(eventId);
-    }
-
-    // ✅ GET LATEST PRICE
+    // ✅ Get latest price (FIXED TYPE)
     @GetMapping("/latest/{eventId}")
-    public Optional<DynamicPriceRecord> getLatestPrice(
+    public ResponseEntity<DynamicPriceRecord> getLatestPrice(
             @PathVariable Long eventId) {
 
-        return service.getLatestPrice(eventId);
+        DynamicPriceRecord price =
+                service.getLatestPrice(eventId);
+
+        return ResponseEntity.ok(price);
+    }
+
+    // ✅ Get price history
+    @GetMapping("/history/{eventId}")
+    public ResponseEntity<List<DynamicPriceRecord>> getPriceHistory(
+            @PathVariable Long eventId) {
+
+        return ResponseEntity.ok(
+                service.getPriceHistory(eventId));
+    }
+
+    // ✅ Get all computed prices
+    @GetMapping("/all")
+    public ResponseEntity<List<DynamicPriceRecord>> getAllPrices() {
+
+        return ResponseEntity.ok(
+                service.getAllComputedPrices());
     }
 }
