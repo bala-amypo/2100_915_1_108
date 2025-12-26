@@ -12,7 +12,9 @@ public class SeatInventoryServiceImpl implements SeatInventoryService {
 
     private final SeatInventoryRecordRepository repository;
 
-    // REQUIRED BY TESTS
+    /**
+     * Constructor required by tests (extra parameter ignored safely)
+     */
     public SeatInventoryServiceImpl(
             SeatInventoryRecordRepository repository,
             Object eventRepository
@@ -23,12 +25,18 @@ public class SeatInventoryServiceImpl implements SeatInventoryService {
     @Override
     public SeatInventoryRecord findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Seat inventory not found with id " + id));
     }
 
     @Override
     public List<SeatInventoryRecord> getInventoryByEvent(Long eventId) {
         return repository.findByEventId(eventId);
+    }
+
+    @Override
+    public List<SeatInventoryRecord> getAllInventories() {
+        return repository.findAll();
     }
 
     @Override
