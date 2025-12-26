@@ -39,8 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtTokenProvider.validateToken(token)) {
 
-                String email =
-                        jwtTokenProvider.getClaims(token).getSubject();
+                // ✅ FIXED METHOD CALL
+                String email = jwtTokenProvider.getUsernameFromToken(token);
 
                 UserDetails userDetails =
                         userDetailsService.loadUserByUsername(email);
