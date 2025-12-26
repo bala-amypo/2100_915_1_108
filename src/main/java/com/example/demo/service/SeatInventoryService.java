@@ -1,14 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.model.SeatInventoryRecord;
-
 import java.util.List;
 
 public interface SeatInventoryService {
 
-    SeatInventoryRecord createInventory(SeatInventoryRecord inventory);
+    SeatInventoryRecord createInventory(SeatInventoryRecord record);
 
-    SeatInventoryRecord updateRemainingSeats(Long inventoryId, Integer remainingSeats);
+    SeatInventoryRecord updateRemainingSeats(Long id, Integer remainingSeats);
 
     SeatInventoryRecord findById(Long id);
 
