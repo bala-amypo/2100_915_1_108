@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,19 +20,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(
-            JwtTokenProvider jwtTokenProvider,
-            CustomUserDetailsService userDetailsService) {
-
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
+                                   CustomUserDetailsService userDetailsService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
@@ -43,7 +41,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtTokenProvider.validateToken(token)) {
 
                 String email =
-                        jwtTokenProvider.getUsernameFromToken(token);
+                        jwtTokenProvider
+                                .getClaimsFromToken(token)
+                                .getSubject();
 
                 UserDetails userDetails =
                         userDetailsService.loadUserByUsername(email);
@@ -60,7 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 .buildDetails(request)
                 );
 
-                SecurityContextHolder.getContext()
+                SecurityContextHolder
+                        .getContext()
                         .setAuthentication(authentication);
             }
         }
@@ -68,4 +69,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
-
