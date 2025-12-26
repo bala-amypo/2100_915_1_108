@@ -12,7 +12,9 @@ public class DynamicPriceRecord {
     private Long id;
 
     private Long eventId;
+
     private Double computedPrice;
+
     private String appliedRuleCodes;
 
     private LocalDateTime computedAt;
@@ -28,28 +30,47 @@ public class DynamicPriceRecord {
         this.appliedRuleCodes = appliedRuleCodes;
     }
 
+    // ✅ Automatically sets timestamp
     @PrePersist
     public void prePersist() {
         this.computedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // ---------- GETTERS & SETTERS ----------
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Long getEventId() { return eventId; }
-    public void setEventId(Long eventId) { this.eventId = eventId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Double getComputedPrice() { return computedPrice; }
+    public Long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
+    }
+
+    public Double getComputedPrice() {
+        return computedPrice;
+    }
+
     public void setComputedPrice(Double computedPrice) {
         this.computedPrice = computedPrice;
     }
 
-    public String getAppliedRuleCodes() { return appliedRuleCodes; }
+    public String getAppliedRuleCodes() {
+        return appliedRuleCodes;
+    }
+
     public void setAppliedRuleCodes(String appliedRuleCodes) {
         this.appliedRuleCodes = appliedRuleCodes;
     }
 
-    public LocalDateTime getComputedAt() { return computedAt; }
+    public LocalDateTime getComputedAt() {
+        return computedAt;
+    }
 }
