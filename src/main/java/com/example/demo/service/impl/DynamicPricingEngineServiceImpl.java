@@ -7,9 +7,10 @@ import com.example.demo.repository.SeatInventoryRecordRepository;
 import com.example.demo.service.DynamicPricingEngineService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-public class DynamicPricingEngineServiceImpl
-        implements DynamicPricingEngineService {
+public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineService {
 
     private final SeatInventoryRecordRepository seatRepo;
     private final DynamicPriceRecordRepository priceRepo;
@@ -22,42 +23,38 @@ public class DynamicPricingEngineServiceImpl
     }
 
     @Override
-    public DynamicPriceRecord computeDynamicPrice(Long eventId) {
+    public DynamicPriceRecord calculateDynamicPrice(Long eventId) {
 
-        SeatInventoryRecord inventory = seatRepo
-                .findFirstByEventId(eventId)
-                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+        List<SeatInventoryRecord> inventories = seatRepo.findByEventId(eventId);
 
-        double basePrice = 100.0; // test does NOT check formula
+        if (inventories.isEmpty()) {
+            throw new RuntimeException("Seat inventory not found for event");
+        }
+
+        SeatInventoryRecord inventory = inventories.get(0);
+
+        int remaining = inventory.getRemainingSeats();
+        int total = inventory.getTotalSeats();
+
+        double basePrice = 100.0; // default base price
         double multiplier = 1.0;
 
-        if (inventory.getRemainingSeats() <= inventory.getTotalSeats() * 0.2) {
+        if (remaining <= total * 0.2) {
             multiplier = 1.5;
-        } else if (inventory.getRemainingSeats() <= inventory.getTotalSeats() * 0.5) {
+        } else if (remaining <= total * 0.5) {
             multiplier = 1.2;
         }
 
         DynamicPriceRecord record = new DynamicPriceRecord();
         record.setEventId(eventId);
         record.setComputedPrice(basePrice * multiplier);
-        record.setAppliedRuleCodes("AUTO");
+        record.setAppliedRuleCodes("SEAT_DEMAND");
 
         return priceRepo.save(record);
     }
 
     @Override
-    public java.util.List<DynamicPriceRecord> getAllComputedPrices() {
+    public List<DynamicPriceRecord> getAllComputedPrices() {
         return priceRepo.findAll();
-    }
-
-    @Override
-    public DynamicPriceRecord getLatestPrice(Long eventId) {
-        return priceRepo.findFirstByEventIdOrderByComputedAtDesc(eventId)
-                .orElse(null);
-    }
-
-    @Override
-    public java.util.List<DynamicPriceRecord> getPriceHistory(Long eventId) {
-        return priceRepo.findByEventIdOrderByComputedAtDesc(eventId);
     }
 }

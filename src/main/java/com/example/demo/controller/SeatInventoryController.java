@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/inventory")
+@RequestMapping("/seat-inventory")
 public class SeatInventoryController {
 
     private final SeatInventoryService service;
@@ -18,30 +18,24 @@ public class SeatInventoryController {
     }
 
     @PostMapping
-    public ResponseEntity<SeatInventoryRecord> createInventory(
-            @RequestBody SeatInventoryRecord record) {
+    public ResponseEntity<SeatInventoryRecord> create(@RequestBody SeatInventoryRecord record) {
         return ResponseEntity.ok(service.createInventory(record));
     }
 
-    @PutMapping("/{id}/remaining/{seats}")
-    public ResponseEntity<SeatInventoryRecord> updateRemainingSeats(
+    @PutMapping("/{id}/remaining/{remaining}")
+    public ResponseEntity<SeatInventoryRecord> updateRemaining(
             @PathVariable Long id,
-            @PathVariable Integer seats) {
-        return ResponseEntity.ok(service.updateRemainingSeats(id, seats));
+            @PathVariable Integer remaining) {
+        return ResponseEntity.ok(service.updateRemainingSeats(id, remaining));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SeatInventoryRecord> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<SeatInventoryRecord>> getAllInventories() {
+    public ResponseEntity<List<SeatInventoryRecord>> getAll() {
         return ResponseEntity.ok(service.getAllInventories());
-    }
-
-    // ✅ FIXED: Optional → ResponseEntity
-    @GetMapping("/event/{eventId}")
-    public ResponseEntity<SeatInventoryRecord> getInventoryByEvent(
-            @PathVariable Long eventId) {
-
-        return service.getInventoryByEvent(eventId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
     }
 }
