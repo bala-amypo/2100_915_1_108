@@ -5,9 +5,10 @@ import com.example.demo.service.DynamicPricingEngineService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/pricing")
+@RequestMapping("/pricing")
 public class DynamicPricingController {
 
     private final DynamicPricingEngineService service;
@@ -16,24 +17,21 @@ public class DynamicPricingController {
         this.service = service;
     }
 
+    // calculate price
     @PostMapping("/calculate/{eventId}")
     public DynamicPriceRecord calculate(@PathVariable Long eventId) {
         return service.calculateDynamicPrice(eventId);
     }
 
+    // latest price
     @GetMapping("/latest/{eventId}")
-    public DynamicPriceRecord getLatest(@PathVariable Long eventId) {
-        return service.getLatestPrice(eventId)
-                .orElseThrow(() -> new RuntimeException("Price not found"));
+    public Optional<DynamicPriceRecord> latest(@PathVariable Long eventId) {
+        return service.getLatestPrice(eventId);
     }
 
+    // all prices
     @GetMapping("/all")
-    public List<DynamicPriceRecord> getAll() {
+    public List<DynamicPriceRecord> all() {
         return service.getAllComputedPrices();
-    }
-
-    @GetMapping("/history/{eventId}")
-    public List<DynamicPriceRecord> getHistory(@PathVariable Long eventId) {
-        return service.getPriceHistory(eventId);
     }
 }
