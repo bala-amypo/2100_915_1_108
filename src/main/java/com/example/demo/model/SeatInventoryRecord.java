@@ -17,13 +17,8 @@ public class SeatInventoryRecord {
 
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+    public SeatInventoryRecord() {
     }
-
-    public SeatInventoryRecord() {}
 
     public SeatInventoryRecord(Long id, Long eventId,
                                Integer totalSeats, Integer remainingSeats) {
@@ -32,6 +27,18 @@ public class SeatInventoryRecord {
         this.totalSeats = totalSeats;
         this.remainingSeats = remainingSeats;
     }
+
+    @PrePersist
+    public void prePersist() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -43,7 +50,9 @@ public class SeatInventoryRecord {
     public void setTotalSeats(Integer totalSeats) { this.totalSeats = totalSeats; }
 
     public Integer getRemainingSeats() { return remainingSeats; }
-    public void setRemainingSeats(Integer remainingSeats) { this.remainingSeats = remainingSeats; }
+    public void setRemainingSeats(Integer remainingSeats) {
+        this.remainingSeats = remainingSeats;
+    }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

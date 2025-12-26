@@ -5,37 +5,30 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-    name = "event_records",
-    uniqueConstraints = @UniqueConstraint(columnNames = "eventCode")
-)
+@Table(name = "event_records")
 public class EventRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String eventCode;
+
     private String eventName;
     private String venue;
     private LocalDate eventDate;
     private Double basePrice;
-    private Boolean active = true;
+    private Boolean active;
 
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        if (this.active == null) {
-            this.active = true;
-        }
+    public EventRecord() {
     }
 
-    public EventRecord() {}
-
-    public EventRecord(Long id, String eventCode, String eventName, String venue,
-                       LocalDate eventDate, Double basePrice, Boolean active) {
+    public EventRecord(Long id, String eventCode, String eventName,
+                       String venue, LocalDate eventDate,
+                       Double basePrice, Boolean active) {
         this.id = id;
         this.eventCode = eventCode;
         this.eventName = eventName;
@@ -44,6 +37,16 @@ public class EventRecord {
         this.basePrice = basePrice;
         this.active = active;
     }
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        if (this.active == null) {
+            this.active = true;
+        }
+    }
+
+    // Getters and Setters
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
