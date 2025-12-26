@@ -7,7 +7,6 @@ import com.example.demo.service.DynamicPricingEngineService;
 import com.example.demo.service.SeatInventoryService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -15,53 +14,71 @@ public class DynamicPricingEngineServiceImpl
         implements DynamicPricingEngineService {
 
     private final SeatInventoryService seatInventoryService;
-    private final DynamicPriceRecordRepository priceRepository;
+    private final DynamicPriceRecordRepository dynamicPriceRecordRepository;
 
     public DynamicPricingEngineServiceImpl(
             SeatInventoryService seatInventoryService,
-            DynamicPriceRecordRepository priceRepository) {
+            DynamicPriceRecordRepository dynamicPriceRecordRepository) {
         this.seatInventoryService = seatInventoryService;
-        this.priceRepository = priceRepository;
+        this.dynamicPriceRecordRepository = dynamicPriceRecordRepository;
     }
 
-    // ✅ REQUIRED BY INTERFACE
+    /**
+     * Calculate dynamic price based on remaining seats
+     */
     @Override
     public DynamicPriceRecord calculateDynamicPrice(Long eventId) {
 
         List<SeatInventoryRecord> inventories =
                 seatInventoryService.getInventoryByEvent(eventId);
 
-        if (inventories.isEmpty()) {
-            throw new RuntimeException("Seat inventory not found for event");
+        if (inventories == null || inventories.isEmpty()) {
+            throw new RuntimeException("Seat inventory not found for event: " + eventId);
         }
 
         SeatInventoryRecord inventory = inventories.get(0);
 
-        double basePrice = inventory.getBaseSeatPrice();
-        int remaining = inventory.getRemainingSeats();
-        int total = inventory.getTotalSeats();
+        int totalSeats = inventory.getTotalSeats();
+        int remainingSeats = inventory.getRemainingSeats();
 
-        double multiplier = 1.0;
+        double computedPrice;
+        String appliedRule;
 
-        if (remaining <= total * 0.2) {
-            multiplier = 1.5;
-        } else if (remaining <= total * 0.5) {
-            multiplier = 1.2;
+        if (remainingSeats <= totalSeats * 0.2) {
+            computedPrice = 150.0;
+            appliedRule = "HIGH_DEMAND";
+        } else if (remainingSeats <= totalSeats * 0.5) {
+            computedPrice = 120.0;
+            appliedRule = "MEDIUM_DEMAND";
+        } else {
+            computedPrice = 100.0;
+            appliedRule = "NORMAL";
         }
-
-        double finalPrice = basePrice * multiplier;
 
         DynamicPriceRecord record = new DynamicPriceRecord();
         record.setEventId(eventId);
-        record.setFinalPrice(finalPrice);
-        record.setCreatedAt(LocalDateTime.now());
+        record.setComputedPrice(computedPrice);
+        record.setAppliedRuleCodes(appliedRule);
 
-        return priceRepository.save(record);
+        return dynamicPriceRecordRepository.save(record);
     }
 
-    // ✅ REQUIRED BY INTERFACE (THIS WAS MISSING)
+    /**
+     * Fetch all computed prices
+     */
     @Override
     public List<DynamicPriceRecord> getAllComputedPrices() {
-        return priceRepository.findAll();
+        return dynamicPriceRecordRepository.findAll();
+    }
+
+    /**
+     * Fetch latest price for an event
+     */
+    @Override
+    public DynamicPriceRecord getLatestPrice(Long eventId) {
+        return dynamicPriceRecordRepository
+                .findTopByEventIdOrderByComputedAtDesc(eventId)
+                .orElseThrow(() ->
+                        new RuntimeException("No dynamic price found for event: " + eventId));
     }
 }
