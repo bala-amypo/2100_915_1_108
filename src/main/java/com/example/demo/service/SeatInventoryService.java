@@ -1,7 +1,9 @@
 package com.example.demo.service;
 
 import com.example.demo.model.SeatInventoryRecord;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface SeatInventoryService {
 
@@ -11,5 +13,6 @@ public interface SeatInventoryService {
 
     List<SeatInventoryRecord> getAllInventories();
 
-    List<SeatInventoryRecord> getInventoryByEvent(Long eventId);
+    // 🔥 TEST EXPECTS OPTIONAL, NOT LIST
+    Optional<SeatInventoryRecord> getInventoryByEvent(Long eventId);
 }
