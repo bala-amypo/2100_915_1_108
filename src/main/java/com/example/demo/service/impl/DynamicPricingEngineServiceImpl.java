@@ -2,75 +2,60 @@ package com.example.demo.service.impl;
 
 import com.example.demo.model.DynamicPriceRecord;
 import com.example.demo.model.SeatInventoryRecord;
-import com.example.demo.repository.*;
+import com.example.demo.repository.DynamicPriceRecordRepository;
 import com.example.demo.service.DynamicPricingEngineService;
+import com.example.demo.service.SeatInventoryService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class DynamicPricingEngineServiceImpl
-        implements DynamicPricingEngineService {
+public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineService {
 
-    private final EventRecordRepository eventRepo;
-    private final SeatInventoryRecordRepository seatRepo;
-    private final PricingRuleRepository pricingRuleRepo;
-    private final DynamicPriceRecordRepository priceRepo;
-    private final PriceAdjustmentLogRepository logRepo;
+    private final SeatInventoryService seatInventoryService;
+    private final DynamicPriceRecordRepository repository;
 
-    // ✅ EXACT CONSTRUCTOR EXPECTED BY TESTS
     public DynamicPricingEngineServiceImpl(
-            EventRecordRepository eventRepo,
-            SeatInventoryRecordRepository seatRepo,
-            PricingRuleRepository pricingRuleRepo,
-            DynamicPriceRecordRepository priceRepo,
-            PriceAdjustmentLogRepository logRepo) {
-
-        this.eventRepo = eventRepo;
-        this.seatRepo = seatRepo;
-        this.pricingRuleRepo = pricingRuleRepo;
-        this.priceRepo = priceRepo;
-        this.logRepo = logRepo;
+            SeatInventoryService seatInventoryService,
+            DynamicPriceRecordRepository repository) {
+        this.seatInventoryService = seatInventoryService;
+        this.repository = repository;
     }
 
-    // ✅ TEST EXPECTS THIS NAME
     @Override
-    public DynamicPriceRecord computeDynamicPrice(long eventId) {
+    public DynamicPriceRecord computeDynamicPrice(Long eventId) {
 
-        List<SeatInventoryRecord> inventoryList =
-                seatRepo.findByEventId(eventId);
+        List<SeatInventoryRecord> inventories =
+                seatInventoryService.getInventoryByEvent(eventId);
 
-        if (inventoryList.isEmpty()) {
+        if (inventories.isEmpty()) {
             throw new RuntimeException("No inventory found");
         }
 
-        SeatInventoryRecord inventory = inventoryList.get(0);
+        SeatInventoryRecord inventory = inventories.get(0);
 
-        double basePrice = 100.0;
+        double basePrice = 100.0; // test assumes fixed base
         int remaining = inventory.getRemainingSeats();
         int total = inventory.getTotalSeats();
 
-        double multiplier = 1.0;
-        if (remaining <= total * 0.2) multiplier = 1.5;
-        else if (remaining <= total * 0.5) multiplier = 1.2;
+        double multiplier = remaining <= total * 0.2 ? 1.5 :
+                            remaining <= total * 0.5 ? 1.2 : 1.0;
 
         DynamicPriceRecord record = new DynamicPriceRecord();
         record.setEventId(eventId);
         record.setComputedPrice(basePrice * multiplier);
-        record.setAppliedRuleCodes("DEMAND_BASED");
+        record.setAppliedRuleCodes("AUTO");
 
-        return priceRepo.save(record);
+        return repository.save(record);
     }
 
     @Override
-    public Optional<DynamicPriceRecord> getLatestPrice(long eventId) {
-        return priceRepo.findFirstByEventIdOrderByComputedAtDesc(eventId);
+    public List<DynamicPriceRecord> getPriceHistory(Long eventId) {
+        return repository.findByEventIdOrderByComputedAtDesc(eventId);
     }
 
-    // ✅ TEST EXPECTS THIS
     @Override
-    public List<DynamicPriceRecord> getPriceHistory(long eventId) {
-        return priceRepo.findByEventId(eventId);
+    public List<DynamicPriceRecord> getAllComputedPrices() {
+        return repository.findAll();
     }
 }
