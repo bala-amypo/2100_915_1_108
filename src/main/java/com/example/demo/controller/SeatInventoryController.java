@@ -2,12 +2,13 @@ package com.example.demo.controller;
 
 import com.example.demo.model.SeatInventoryRecord;
 import com.example.demo.service.SeatInventoryService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/seat-inventory")
+@RequestMapping("/api/inventory")
 public class SeatInventoryController {
 
     private final SeatInventoryService service;
@@ -16,39 +17,31 @@ public class SeatInventoryController {
         this.service = service;
     }
 
-    // ✅ CREATE INVENTORY
     @PostMapping
-    public SeatInventoryRecord createInventory(
-            @RequestBody SeatInventoryRecord inventory) {
-        return service.createInventory(inventory);
+    public ResponseEntity<SeatInventoryRecord> createInventory(
+            @RequestBody SeatInventoryRecord record) {
+        return ResponseEntity.ok(service.createInventory(record));
     }
 
-    // ✅ UPDATE REMAINING SEATS
-    @PutMapping("/{id}/remaining/{count}")
-    public SeatInventoryRecord updateRemainingSeats(
+    @PutMapping("/{id}/remaining/{seats}")
+    public ResponseEntity<SeatInventoryRecord> updateRemainingSeats(
             @PathVariable Long id,
-            @PathVariable Integer count) {
-        return service.updateRemainingSeats(id, count);
+            @PathVariable Integer seats) {
+        return ResponseEntity.ok(service.updateRemainingSeats(id, seats));
     }
 
-    // ✅ GET INVENTORY BY EVENT (FIXED — NO orElseThrow)
+    @GetMapping
+    public ResponseEntity<List<SeatInventoryRecord>> getAllInventories() {
+        return ResponseEntity.ok(service.getAllInventories());
+    }
+
+    // ✅ FIXED: Optional → ResponseEntity
     @GetMapping("/event/{eventId}")
-    public List<SeatInventoryRecord> getInventoryByEvent(
+    public ResponseEntity<SeatInventoryRecord> getInventoryByEvent(
             @PathVariable Long eventId) {
 
-        List<SeatInventoryRecord> list =
-                service.getInventoryByEvent(eventId);
-
-        if (list.isEmpty()) {
-            throw new RuntimeException("No seat inventory found for event");
-        }
-
-        return list;
-    }
-
-    // ✅ GET ALL
-    @GetMapping
-    public List<SeatInventoryRecord> getAllInventories() {
-        return service.getAllInventories();
+        return service.getInventoryByEvent(eventId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
