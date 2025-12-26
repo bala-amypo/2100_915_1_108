@@ -6,12 +6,9 @@ import java.util.Optional;
 
 public interface DynamicPricingEngineService {
 
-    // calculate and store price
-    DynamicPriceRecord calculateDynamicPrice(Long eventId);
+    DynamicPriceRecord computeDynamicPrice(long eventId);
 
-    // get latest price for event
-    Optional<DynamicPriceRecord> getLatestPrice(Long eventId);
+    Optional<DynamicPriceRecord> getLatestPrice(long eventId);
 
-    // get full price history
-    List<DynamicPriceRecord> getAllComputedPrices();
+    List<DynamicPriceRecord> getPriceHistory(long eventId);
 }
