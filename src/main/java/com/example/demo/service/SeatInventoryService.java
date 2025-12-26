@@ -6,16 +6,13 @@ import java.util.List;
 
 public interface SeatInventoryService {
 
-    SeatInventoryRecord save(SeatInventoryRecord seatInventory);
+    SeatInventoryRecord createInventory(SeatInventoryRecord inventory);
 
-    SeatInventoryRecord update(SeatInventoryRecord seatInventory);
+    SeatInventoryRecord updateRemainingSeats(Long inventoryId, Integer remainingSeats);
 
-    
     SeatInventoryRecord findById(Long id);
 
-    List<SeatInventoryRecord> findByEventId(Long eventId);
+    List<SeatInventoryRecord> getInventoryByEvent(Long eventId);
 
-    List<SeatInventoryRecord> findAll();
-
-    void deleteById(Long id);
+    List<SeatInventoryRecord> getAllInventories();
 }

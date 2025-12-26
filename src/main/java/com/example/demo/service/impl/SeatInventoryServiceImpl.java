@@ -1,59 +1,54 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.model.SeatInventoryRecord;
-import com.example.demo.repository.SeatInventoryRepository;
+import com.example.demo.repository.SeatInventoryRecordRepository;
 import com.example.demo.service.SeatInventoryService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class SeatInventoryServiceImpl implements SeatInventoryService {
 
-    private final SeatInventoryRepository seatInventoryRepository;
+    private final SeatInventoryRecordRepository repository;
 
-    // ✅ Constructor Injection (MANDATORY as per rules)
-    public SeatInventoryServiceImpl(SeatInventoryRepository seatInventoryRepository) {
-        this.seatInventoryRepository = seatInventoryRepository;
+    // ✅ Constructor Injection
+    public SeatInventoryServiceImpl(SeatInventoryRecordRepository repository) {
+        this.repository = repository;
     }
 
-    // ✅ SAVE
+    // ✅ CREATE
     @Override
-    public SeatInventoryRecord save(SeatInventoryRecord seatInventory) {
-        seatInventory.setUpdatedAt(LocalDateTime.now());
-        return seatInventoryRepository.save(seatInventory);
+    public SeatInventoryRecord createInventory(SeatInventoryRecord inventory) {
+        return repository.save(inventory);
     }
 
-    // ✅ UPDATE
+    // ✅ UPDATE REMAINING SEATS
     @Override
-    public SeatInventoryRecord update(SeatInventoryRecord seatInventory) {
-        seatInventory.setUpdatedAt(LocalDateTime.now());
-        return seatInventoryRepository.save(seatInventory);
+    public SeatInventoryRecord updateRemainingSeats(Long inventoryId, Integer remainingSeats) {
+        SeatInventoryRecord inventory = repository.findById(inventoryId)
+                .orElseThrow(() -> new RuntimeException("Seat inventory not found"));
+
+        inventory.setRemainingSeats(remainingSeats);
+        return repository.save(inventory);
     }
 
-    // ✅ FIND BY ID (IMPORTANT FIX FOR TEST LINE 832)
+    // ✅ FIND BY ID (NO Optional — TEST SAFE)
     @Override
     public SeatInventoryRecord findById(Long id) {
-        return seatInventoryRepository.findById(id)
+        return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Seat inventory not found"));
     }
 
-    // ✅ FIND BY EVENT ID
+    // ✅ FIND BY EVENT
     @Override
-    public List<SeatInventoryRecord> findByEventId(Long eventId) {
-        return seatInventoryRepository.findByEventId(eventId);
-    }
-
-    // ✅ DELETE
-    @Override
-    public void deleteById(Long id) {
-        seatInventoryRepository.deleteById(id);
+    public List<SeatInventoryRecord> getInventoryByEvent(Long eventId) {
+        return repository.findByEventId(eventId);
     }
 
     // ✅ FIND ALL
     @Override
-    public List<SeatInventoryRecord> findAll() {
-        return seatInventoryRepository.findAll();
+    public List<SeatInventoryRecord> getAllInventories() {
+        return repository.findAll();
     }
 }
