@@ -18,21 +18,25 @@ public class PriceAdjustmentLog {
 
     private LocalDateTime changedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.changedAt = LocalDateTime.now();
+    public PriceAdjustmentLog() {
     }
 
-    public PriceAdjustmentLog() {}
-
     public PriceAdjustmentLog(Long id, Long eventId,
-                              Double oldPrice, Double newPrice, String reason) {
+                              Double oldPrice, Double newPrice,
+                              String reason) {
         this.id = id;
         this.eventId = eventId;
         this.oldPrice = oldPrice;
         this.newPrice = newPrice;
         this.reason = reason;
     }
+
+    @PrePersist
+    public void prePersist() {
+        this.changedAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
