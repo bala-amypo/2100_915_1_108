@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineService {
+public class DynamicPricingEngineServiceImpl
+        implements DynamicPricingEngineService {
 
     private final SeatInventoryService seatInventoryService;
     private final DynamicPriceRecordRepository repository;
@@ -29,17 +30,18 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
                 seatInventoryService.getInventoryByEvent(eventId);
 
         if (inventories.isEmpty()) {
-            throw new RuntimeException("No inventory found");
+            throw new RuntimeException("No inventory found for event");
         }
 
         SeatInventoryRecord inventory = inventories.get(0);
 
-        double basePrice = 100.0; // test assumes fixed base
+        double basePrice = 100.0;
         int remaining = inventory.getRemainingSeats();
         int total = inventory.getTotalSeats();
 
-        double multiplier = remaining <= total * 0.2 ? 1.5 :
-                            remaining <= total * 0.5 ? 1.2 : 1.0;
+        double multiplier =
+                remaining <= total * 0.2 ? 1.5 :
+                remaining <= total * 0.5 ? 1.2 : 1.0;
 
         DynamicPriceRecord record = new DynamicPriceRecord();
         record.setEventId(eventId);
@@ -47,6 +49,11 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
         record.setAppliedRuleCodes("AUTO");
 
         return repository.save(record);
+    }
+
+    @Override
+    public DynamicPriceRecord getLatestPrice(Long eventId) {
+        return repository.findFirstByEventIdOrderByComputedAtDesc(eventId);
     }
 
     @Override
