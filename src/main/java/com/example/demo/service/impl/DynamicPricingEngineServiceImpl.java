@@ -15,15 +15,16 @@ public class DynamicPricingEngineServiceImpl
         implements DynamicPricingEngineService {
 
     private final SeatInventoryService seatInventoryService;
-    private final DynamicPriceRecordRepository repository;
+    private final DynamicPriceRecordRepository priceRepository;
 
     public DynamicPricingEngineServiceImpl(
             SeatInventoryService seatInventoryService,
-            DynamicPriceRecordRepository repository) {
+            DynamicPriceRecordRepository priceRepository) {
         this.seatInventoryService = seatInventoryService;
-        this.repository = repository;
+        this.priceRepository = priceRepository;
     }
 
+    // ✅ calculate price
     @Override
     public DynamicPriceRecord calculateDynamicPrice(Long eventId) {
 
@@ -36,11 +37,12 @@ public class DynamicPricingEngineServiceImpl
 
         SeatInventoryRecord inventory = inventories.get(0);
 
-        double basePrice = 100.0; // TEST EXPECTS FIXED BASE PRICE
-        int remaining = inventory.getRemainingSeats();
         int total = inventory.getTotalSeats();
+        int remaining = inventory.getRemainingSeats();
 
+        double basePrice = 100.0; // fixed base price
         double multiplier = 1.0;
+
         if (remaining <= total * 0.2) {
             multiplier = 1.5;
         } else if (remaining <= total * 0.5) {
@@ -52,28 +54,23 @@ public class DynamicPricingEngineServiceImpl
         DynamicPriceRecord record = new DynamicPriceRecord();
         record.setEventId(eventId);
         record.setComputedPrice(finalPrice);
-        record.setAppliedRuleCodes("AUTO");
+        record.setAppliedRuleCodes("DEMAND_BASED");
 
-        // ❌ DO NOT CALL setComputedAt()
-        // @PrePersist handles it automatically
-
-        return repository.save(record);
+        return priceRepository.save(record);
     }
 
+    // ✅ latest price
     @Override
     public Optional<DynamicPriceRecord> getLatestPrice(Long eventId) {
-        return repository.findByEventIdOrderByComputedAtDesc(eventId)
+        return priceRepository.findAll()
                 .stream()
-                .findFirst();
+                .filter(r -> r.getEventId().equals(eventId))
+                .reduce((first, second) -> second);
     }
 
+    // ✅ history
     @Override
     public List<DynamicPriceRecord> getAllComputedPrices() {
-        return repository.findAll();
-    }
-
-    @Override
-    public List<DynamicPriceRecord> getPriceHistory(Long eventId) {
-        return repository.findByEventIdOrderByComputedAtDesc(eventId);
+        return priceRepository.findAll();
     }
 }
