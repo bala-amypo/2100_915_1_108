@@ -27,7 +27,6 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ---------------- REGISTER ----------------
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestParam String email,
                                       @RequestParam String password) {
@@ -36,13 +35,11 @@ public class AuthController {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
 
-        // call correct service method
         userService.registerUser(user);
 
         return ResponseEntity.ok("User registered successfully");
     }
 
-    // ---------------- LOGIN ----------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String email,
                                    @RequestParam String password) {
@@ -59,7 +56,8 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getId());
+        String token =
+                jwtTokenProvider.generateToken(user.getEmail(), user.getId());
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
