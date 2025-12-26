@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/pricing")
+@RequestMapping("/api/pricing")
 public class DynamicPricingController {
 
     private final DynamicPricingEngineService service;
@@ -17,21 +17,27 @@ public class DynamicPricingController {
         this.service = service;
     }
 
-    // calculate price
-    @PostMapping("/calculate/{eventId}")
-    public DynamicPriceRecord calculate(@PathVariable Long eventId) {
-        return service.calculateDynamicPrice(eventId);
+    // ✅ TEST-COMPATIBLE METHOD
+    @PostMapping("/compute/{eventId}")
+    public DynamicPriceRecord computePrice(
+            @PathVariable Long eventId) {
+
+        return service.computeDynamicPrice(eventId);
     }
 
-    // latest price
+    // ✅ GET PRICE HISTORY (TEST EXPECTS THIS)
+    @GetMapping("/history/{eventId}")
+    public List<DynamicPriceRecord> getPriceHistory(
+            @PathVariable Long eventId) {
+
+        return service.getPriceHistory(eventId);
+    }
+
+    // ✅ GET LATEST PRICE
     @GetMapping("/latest/{eventId}")
-    public Optional<DynamicPriceRecord> latest(@PathVariable Long eventId) {
-        return service.getLatestPrice(eventId);
-    }
+    public Optional<DynamicPriceRecord> getLatestPrice(
+            @PathVariable Long eventId) {
 
-    // all prices
-    @GetMapping("/all")
-    public List<DynamicPriceRecord> all() {
-        return service.getAllComputedPrices();
+        return service.getLatestPrice(eventId);
     }
 }
