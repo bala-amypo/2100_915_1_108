@@ -67,3 +67,4 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 }
+java -jar target/demo-0.0.1-SNAPSHOT.jar
