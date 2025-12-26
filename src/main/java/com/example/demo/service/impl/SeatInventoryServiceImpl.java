@@ -13,7 +13,7 @@ public class SeatInventoryServiceImpl implements SeatInventoryService {
     private final SeatInventoryRecordRepository repository;
 
     /**
-     * Constructor matches tests (extra parameter allowed)
+     * Constructor matches test expectations
      */
     public SeatInventoryServiceImpl(
             SeatInventoryRecordRepository repository,
@@ -22,6 +22,13 @@ public class SeatInventoryServiceImpl implements SeatInventoryService {
         this.repository = repository;
     }
 
+    // ✅ REQUIRED BY INTERFACE
+    @Override
+    public SeatInventoryRecord createInventory(SeatInventoryRecord record) {
+        return repository.save(record);
+    }
+
+    // ✅ REQUIRED BY INTERFACE
     @Override
     public SeatInventoryRecord findById(Long id) {
         return repository.findById(id)
@@ -29,22 +36,19 @@ public class SeatInventoryServiceImpl implements SeatInventoryService {
                         new RuntimeException("Seat inventory not found with id " + id));
     }
 
+    // ✅ REQUIRED BY INTERFACE
     @Override
     public List<SeatInventoryRecord> getInventoryByEvent(Long eventId) {
         return repository.findByEventId(eventId);
     }
 
+    // ✅ REQUIRED BY INTERFACE
     @Override
     public List<SeatInventoryRecord> getAllInventories() {
         return repository.findAll();
     }
 
-    @Override
-    public SeatInventoryRecord save(SeatInventoryRecord record) {
-        return repository.save(record);
-    }
-
-    // ✅ THIS METHOD WAS MISSING — NOW FIXED
+    // ✅ REQUIRED BY INTERFACE
     @Override
     public SeatInventoryRecord updateRemainingSeats(Long inventoryId, Integer remainingSeats) {
         SeatInventoryRecord record = repository.findById(inventoryId)
