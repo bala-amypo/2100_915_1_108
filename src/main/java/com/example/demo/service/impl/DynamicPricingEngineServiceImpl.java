@@ -24,10 +24,10 @@ public class DynamicPricingEngineServiceImpl
         this.priceRepository = priceRepository;
     }
 
+    // ✅ REQUIRED BY INTERFACE
     @Override
     public DynamicPriceRecord calculateDynamicPrice(Long eventId) {
 
-        // ✅ FIX: List, NOT Optional
         List<SeatInventoryRecord> inventories =
                 seatInventoryService.getInventoryByEvent(eventId);
 
@@ -37,15 +37,15 @@ public class DynamicPricingEngineServiceImpl
 
         SeatInventoryRecord inventory = inventories.get(0);
 
-        double basePrice = inventory.getBasePrice();
+        double basePrice = inventory.getBaseSeatPrice();
         int remaining = inventory.getRemainingSeats();
         int total = inventory.getTotalSeats();
 
         double multiplier = 1.0;
 
-        if (remaining < total * 0.2) {
+        if (remaining <= total * 0.2) {
             multiplier = 1.5;
-        } else if (remaining < total * 0.5) {
+        } else if (remaining <= total * 0.5) {
             multiplier = 1.2;
         }
 
@@ -53,9 +53,15 @@ public class DynamicPricingEngineServiceImpl
 
         DynamicPriceRecord record = new DynamicPriceRecord();
         record.setEventId(eventId);
-        record.setCalculatedPrice(finalPrice);
-        record.setCalculatedAt(LocalDateTime.now());
+        record.setFinalPrice(finalPrice);
+        record.setCreatedAt(LocalDateTime.now());
 
         return priceRepository.save(record);
+    }
+
+    // ✅ REQUIRED BY INTERFACE (THIS WAS MISSING)
+    @Override
+    public List<DynamicPriceRecord> getAllComputedPrices() {
+        return priceRepository.findAll();
     }
 }
