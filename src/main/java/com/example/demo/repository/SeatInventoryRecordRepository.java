@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface SeatInventoryRecordRepository
         extends JpaRepository<SeatInventoryRecord, Long> {
 
-    // 🔥 REQUIRED BY TEST
-    Optional<SeatInventoryRecord> findFirstByEventId(Long eventId);
+    // ✅ REQUIRED BY TESTS
+    Optional<SeatInventoryRecord> findByEventId(Long eventId);
 }
