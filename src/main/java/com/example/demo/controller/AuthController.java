@@ -1,14 +1,14 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.AuthRequest;
-import com.example.demo.dto.AuthResponse;
 import com.example.demo.model.User;
 import com.example.demo.security.JwtTokenProvider;
 import com.example.demo.service.UserService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -26,38 +26,40 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ================= REGISTER =================
+    // ---------------- REGISTER ----------------
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> register(@RequestParam String username,
+                                      @RequestParam String email,
+                                      @RequestParam String password) {
 
         User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("USER");
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
 
-        userService.save(user);
+        userService.saveUser(user);
 
         return ResponseEntity.ok("User registered successfully");
     }
 
-    // ================= LOGIN =================
+    // ---------------- LOGIN ----------------
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestParam String email,
+                                   @RequestParam String password) {
 
-        User user = userService.findByEmail(request.getEmail());
+        User user = userService.findByEmail(email);
 
-        if (user == null ||
-                !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).build();
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // ✅ CORRECT TOKEN GENERATION (FIXED)
-        String token = jwtTokenProvider.generateToken(
-                user.getEmail(),   // username
-                user.getId()       // userId
-        );
+        // JwtTokenProvider expects (String username, Long userId)
+        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getId());
 
-        AuthResponse response = new AuthResponse(token);
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("userId", user.getId());
+        response.put("email", user.getEmail());
 
         return ResponseEntity.ok(response);
     }
