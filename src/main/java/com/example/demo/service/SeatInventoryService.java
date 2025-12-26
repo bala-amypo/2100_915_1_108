@@ -8,9 +8,11 @@ public interface SeatInventoryService {
 
     SeatInventoryRecord createInventory(SeatInventoryRecord record);
 
-    SeatInventoryRecord updateRemainingSeats(Long id, Integer seats);
+    SeatInventoryRecord updateRemainingSeats(Long id, Integer remaining);
 
-    SeatInventoryRecord getInventoryByEvent(Long eventId); // ❗ NOT Optional
+    SeatInventoryRecord findById(Long id);
 
     List<SeatInventoryRecord> getAllInventories();
+
+    List<SeatInventoryRecord> findByEventId(Long eventId);
 }

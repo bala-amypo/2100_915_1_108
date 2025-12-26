@@ -22,21 +22,25 @@ public class SeatInventoryServiceImpl implements SeatInventoryService {
     }
 
     @Override
-    public SeatInventoryRecord updateRemainingSeats(Long id, Integer seats) {
-        SeatInventoryRecord record = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Inventory not found"));
-        record.setRemainingSeats(seats);
+    public SeatInventoryRecord updateRemainingSeats(Long id, Integer remaining) {
+        SeatInventoryRecord record = findById(id);
+        record.setRemainingSeats(remaining);
         return repository.save(record);
     }
 
     @Override
-    public SeatInventoryRecord getInventoryByEvent(Long eventId) {
-        return repository.findByEventId(eventId)
-                .orElseThrow(() -> new RuntimeException("Inventory not found"));
+    public SeatInventoryRecord findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Seat inventory not found"));
     }
 
     @Override
     public List<SeatInventoryRecord> getAllInventories() {
         return repository.findAll();
+    }
+
+    @Override
+    public List<SeatInventoryRecord> findByEventId(Long eventId) {
+        return repository.findByEventId(eventId);
     }
 }
