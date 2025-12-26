@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,16 +29,15 @@ public class AuthController {
 
     // ---------------- REGISTER ----------------
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestParam String username,
-                                      @RequestParam String email,
+    public ResponseEntity<?> register(@RequestParam String email,
                                       @RequestParam String password) {
 
         User user = new User();
-        user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
 
-        userService.saveUser(user);
+        // call correct service method
+        userService.registerUser(user);
 
         return ResponseEntity.ok("User registered successfully");
     }
@@ -47,13 +47,18 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestParam String email,
                                    @RequestParam String password) {
 
-        User user = userService.findByEmail(email);
+        Optional<User> optionalUser = userService.findByEmail(email);
 
-        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
 
-        // JwtTokenProvider expects (String username, Long userId)
+        User user = optionalUser.get();
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+
         String token = jwtTokenProvider.generateToken(user.getEmail(), user.getId());
 
         Map<String, Object> response = new HashMap<>();
