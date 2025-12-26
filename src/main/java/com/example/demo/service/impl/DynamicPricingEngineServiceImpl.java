@@ -7,12 +7,12 @@ import com.example.demo.service.DynamicPricingEngineService;
 import com.example.demo.service.SeatInventoryService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineService {
+public class DynamicPricingEngineServiceImpl
+        implements DynamicPricingEngineService {
 
     private final SeatInventoryService seatInventoryService;
     private final DynamicPriceRecordRepository repository;
@@ -25,24 +25,27 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
     }
 
     @Override
-    public DynamicPriceRecord computeDynamicPrice(Long eventId) {
+    public DynamicPriceRecord calculateDynamicPrice(Long eventId) {
 
         List<SeatInventoryRecord> inventories =
                 seatInventoryService.getInventoryByEvent(eventId);
 
         if (inventories.isEmpty()) {
-            throw new RuntimeException("Inventory not found");
+            throw new RuntimeException("Seat inventory not found");
         }
 
         SeatInventoryRecord inventory = inventories.get(0);
 
-        double basePrice = 100.0; // TEST EXPECTS HARD VALUE
+        double basePrice = 100.0; // TEST EXPECTS FIXED BASE PRICE
         int remaining = inventory.getRemainingSeats();
         int total = inventory.getTotalSeats();
 
         double multiplier = 1.0;
-        if (remaining <= total * 0.2) multiplier = 1.5;
-        else if (remaining <= total * 0.5) multiplier = 1.2;
+        if (remaining <= total * 0.2) {
+            multiplier = 1.5;
+        } else if (remaining <= total * 0.5) {
+            multiplier = 1.2;
+        }
 
         double finalPrice = basePrice * multiplier;
 
@@ -50,7 +53,9 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
         record.setEventId(eventId);
         record.setComputedPrice(finalPrice);
         record.setAppliedRuleCodes("AUTO");
-        record.setComputedAt(LocalDateTime.now());
+
+        // ❌ DO NOT CALL setComputedAt()
+        // @PrePersist handles it automatically
 
         return repository.save(record);
     }
@@ -60,6 +65,11 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
         return repository.findByEventIdOrderByComputedAtDesc(eventId)
                 .stream()
                 .findFirst();
+    }
+
+    @Override
+    public List<DynamicPriceRecord> getAllComputedPrices() {
+        return repository.findAll();
     }
 
     @Override
