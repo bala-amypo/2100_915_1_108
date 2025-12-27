@@ -41,15 +41,12 @@ public class JwtTokenProvider {
     }
 
     // =========================
-    // TEST-EXPECTED METHODS
+    // METHODS REQUIRED BY TESTS
     // =========================
-
-    // 🔴 REQUIRED BY TESTS
     public String getUsernameFromToken(String token) {
         return getAllClaims(token).getSubject();
     }
 
-    // 🔴 REQUIRED BY TESTS
     public Claims getAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -58,9 +55,6 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
-    // =========================
-    // VALIDATION
-    // =========================
     public boolean validateToken(String token) {
         try {
             getAllClaims(token);
@@ -68,13 +62,6 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
-    }
-
-    // =========================
-    // EXTRA HELPERS (USED ELSEWHERE)
-    // =========================
-    public String getUsername(String token) {
-        return getUsernameFromToken(token);
     }
 
     public String getRole(String token) {
