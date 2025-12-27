@@ -5,7 +5,7 @@ import com.example.demo.repository.PriceAdjustmentLogRepository;
 import com.example.demo.service.PriceAdjustmentLogService;
 
 import java.util.List;
-
+@Service
 public class PriceAdjustmentLogServiceImpl implements PriceAdjustmentLogService {
 
     private final PriceAdjustmentLogRepository repository;

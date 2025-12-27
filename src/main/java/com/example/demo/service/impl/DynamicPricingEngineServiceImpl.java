@@ -7,7 +7,7 @@ import com.example.demo.service.DynamicPricingEngineService;
 
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-
+@Service
 public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineService {
 
     private final EventRecordRepository eventRepository;

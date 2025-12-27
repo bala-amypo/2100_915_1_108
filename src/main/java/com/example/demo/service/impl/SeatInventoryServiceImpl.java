@@ -7,7 +7,7 @@ import com.example.demo.repository.SeatInventoryRecordRepository;
 import com.example.demo.service.SeatInventoryService;
 
 import java.util.List;
-
+@Service
 public class SeatInventoryServiceImpl implements SeatInventoryService {
 
     private final SeatInventoryRecordRepository inventoryRepository;
