@@ -1,56 +1,49 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.AuthRequest;
+import com.example.demo.dto.AuthResponse;
+import com.example.demo.model.User;
 import com.example.demo.security.JwtTokenProvider;
-import com.example.demo.security.CustomUserDetailsService;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import com.example.demo.service.UserService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Authentication")
 public class AuthController {
 
-    private final CustomUserDetailsService userService;
+    private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthController(CustomUserDetailsService userService,
-                          JwtTokenProvider jwtTokenProvider) {
+    public AuthController(UserService userService,
+                          JwtTokenProvider jwtTokenProvider,
+                          PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Object>> register(
-            @RequestParam String fullName,
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam String role) {
-
-        Map<String, Object> user =
-                userService.registerUser(fullName, email, password, role);
-        return ResponseEntity.ok(user);
+    public User register(@RequestBody User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userService.save(user);
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<String> login(
-            @RequestParam String email,
-            @RequestParam String password) {
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody AuthRequest request) {
 
-        Authentication auth =
-                new UsernamePasswordAuthenticationToken(email, password);
+        User user = userService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-        String token =
-                jwtTokenProvider.generateToken(
-                        auth,
-                        1L,
-                        "USER"
-                );
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
 
-        return ResponseEntity.ok(token);
+        String token = jwtTokenProvider.generateToken(
+                user.getId(), user.getEmail(), user.getRole());
+
+        return new AuthResponse(token, user.getId(),
+                user.getEmail(), user.getRole());
     }
 }
