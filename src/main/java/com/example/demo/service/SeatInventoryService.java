@@ -6,18 +6,11 @@ import java.util.List;
 
 public interface SeatInventoryService {
 
-    // REQUIRED BY CONTROLLER + TESTS
     SeatInventoryRecord createInventory(SeatInventoryRecord inventory);
 
-    // REQUIRED BY CONTROLLER + TESTS
-    SeatInventoryRecord updateRemainingSeats(Long inventoryId, Integer remainingSeats);
+    SeatInventoryRecord updateRemainingSeats(Long eventId, Integer remainingSeats);
 
-    // REQUIRED BY CONTROLLER + TESTS
-    SeatInventoryRecord findById(Long id);
-
-    // REQUIRED BY CONTROLLER + TESTS
-    List<SeatInventoryRecord> getAllInventories();
-
-    // REQUIRED BY TESTS
     SeatInventoryRecord getInventoryByEvent(Long eventId);
+
+    List<SeatInventoryRecord> getAllInventories();
 }
