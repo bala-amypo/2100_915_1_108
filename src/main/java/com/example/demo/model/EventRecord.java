@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "event_records")
 public class EventRecord {
 
     @Id
@@ -17,36 +18,29 @@ public class EventRecord {
     private String venue;
     private LocalDate eventDate;
     private Double basePrice;
+    private Boolean active = true;
     private LocalDateTime createdAt;
-    private Boolean active;
 
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
-        if (this.active == null) this.active = true;
+        if (active == null) active = true;
     }
 
-    // getters and setters
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getEventCode() { return eventCode; }
     public void setEventCode(String eventCode) { this.eventCode = eventCode; }
-
     public String getEventName() { return eventName; }
     public void setEventName(String eventName) { this.eventName = eventName; }
-
     public String getVenue() { return venue; }
     public void setVenue(String venue) { this.venue = venue; }
-
     public LocalDate getEventDate() { return eventDate; }
     public void setEventDate(LocalDate eventDate) { this.eventDate = eventDate; }
-
     public Double getBasePrice() { return basePrice; }
     public void setBasePrice(Double basePrice) { this.basePrice = basePrice; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }
