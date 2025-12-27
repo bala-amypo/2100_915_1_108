@@ -16,17 +16,34 @@ public class DynamicPriceRecord {
     private String appliedRuleCodes;
     private LocalDateTime computedAt;
 
+    // No-arg constructor
+    public DynamicPriceRecord() {}
+
+    // Parameterized constructor
+    public DynamicPriceRecord(Long id, Long eventId,
+                              Double computedPrice, String appliedRuleCodes) {
+        this.id = id;
+        this.eventId = eventId;
+        this.computedPrice = computedPrice;
+        this.appliedRuleCodes = appliedRuleCodes;
+    }
+
     @PrePersist
     public void prePersist() {
         this.computedAt = LocalDateTime.now();
     }
 
-    // getters & setters
+    // Getters & Setters
+    public Long getId() { return id; }
+
     public Long getEventId() { return eventId; }
     public void setEventId(Long eventId) { this.eventId = eventId; }
+
     public Double getComputedPrice() { return computedPrice; }
     public void setComputedPrice(Double computedPrice) { this.computedPrice = computedPrice; }
+
     public String getAppliedRuleCodes() { return appliedRuleCodes; }
     public void setAppliedRuleCodes(String appliedRuleCodes) { this.appliedRuleCodes = appliedRuleCodes; }
+
     public LocalDateTime getComputedAt() { return computedAt; }
 }
