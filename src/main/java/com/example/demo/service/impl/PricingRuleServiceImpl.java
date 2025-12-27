@@ -4,9 +4,11 @@ import com.example.demo.exception.BadRequestException;
 import com.example.demo.model.PricingRule;
 import com.example.demo.repository.PricingRuleRepository;
 import com.example.demo.service.PricingRuleService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class PricingRuleServiceImpl implements PricingRuleService {
 
@@ -32,7 +34,6 @@ public class PricingRuleServiceImpl implements PricingRuleService {
 
     @Override
     public PricingRule updateRule(Long id, PricingRule updatedRule) {
-        // ID setter NOW EXISTS, so this is SAFE
         updatedRule.setId(id);
         return repository.save(updatedRule);
     }
