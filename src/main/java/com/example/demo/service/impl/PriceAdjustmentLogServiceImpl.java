@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.model.PriceAdjustmentLog;
 import com.example.demo.repository.PriceAdjustmentLogRepository;
 import com.example.demo.service.PriceAdjustmentLogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,24 +11,25 @@ import java.util.List;
 @Service
 public class PriceAdjustmentLogServiceImpl implements PriceAdjustmentLogService {
 
-    private final PriceAdjustmentLogRepository repository;
+    private final PriceAdjustmentLogRepository priceAdjustmentLogRepository;
 
-    public PriceAdjustmentLogServiceImpl(PriceAdjustmentLogRepository repository) {
-        this.repository = repository;
+    @Autowired
+    public PriceAdjustmentLogServiceImpl(PriceAdjustmentLogRepository priceAdjustmentLogRepository) {
+        this.priceAdjustmentLogRepository = priceAdjustmentLogRepository;
     }
 
     @Override
-    public PriceAdjustmentLog logAdjustment(PriceAdjustmentLog log) {
-        return repository.save(log);
+    public PriceAdjustmentLog createLog(PriceAdjustmentLog log) {
+        return priceAdjustmentLogRepository.save(log);
     }
 
     @Override
     public List<PriceAdjustmentLog> getAdjustmentsByEvent(Long eventId) {
-        return repository.findByEventId(eventId);
+        return priceAdjustmentLogRepository.findByEventId(eventId);
     }
 
     @Override
     public List<PriceAdjustmentLog> getAllAdjustments() {
-        return repository.findAll();
+        return priceAdjustmentLogRepository.findAll();
     }
 }
