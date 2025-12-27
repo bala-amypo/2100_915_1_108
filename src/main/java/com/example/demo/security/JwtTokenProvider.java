@@ -18,6 +18,9 @@ public class JwtTokenProvider {
         this.enabled = enabled;
     }
 
+    // =========================
+    // TOKEN GENERATION
+    // =========================
     public String generateToken(String username, String role, Long userId) {
 
         if (!enabled) return null;
@@ -37,42 +40,48 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // =========================
+    // TEST-EXPECTED METHODS
+    // =========================
+
+    // 🔴 REQUIRED BY TESTS
+    public String getUsernameFromToken(String token) {
+        return getAllClaims(token).getSubject();
+    }
+
+    // 🔴 REQUIRED BY TESTS
+    public Claims getAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    // =========================
+    // VALIDATION
+    // =========================
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+            getAllClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
+    // =========================
+    // EXTRA HELPERS (USED ELSEWHERE)
+    // =========================
     public String getUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return getUsernameFromToken(token);
     }
 
     public String getRole(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
+        return getAllClaims(token).get("role", String.class);
     }
 
     public Long getUserId(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("userId", Long.class);
+        return getAllClaims(token).get("userId", Long.class);
     }
 }
