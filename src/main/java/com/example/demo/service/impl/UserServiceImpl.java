@@ -3,26 +3,34 @@ package com.example.demo.service.impl;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
-import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-@Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(UserRepository repository,
+                           PasswordEncoder passwordEncoder) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public User registerUser(User user) {
-        return userRepository.save(user);
+    public User save(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return repository.save(user);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return repository.findByEmail(email);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return repository.findByEmail(email).isPresent();
     }
 }
