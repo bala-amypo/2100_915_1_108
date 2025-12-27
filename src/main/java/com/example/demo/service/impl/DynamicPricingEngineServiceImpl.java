@@ -4,12 +4,14 @@ import com.example.demo.exception.BadRequestException;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.DynamicPricingEngineService;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineService {
+@Service
+public class DynamicPricingEngineServiceImpl
+        implements DynamicPricingEngineService {
 
     private final EventRecordRepository eventRepo;
     private final SeatInventoryRecordRepository seatRepo;
@@ -31,13 +33,20 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
         this.logRepo = logRepo;
     }
 
+    // Controller uses THIS
+    @Override
+    public DynamicPriceRecord calculateDynamicPrice(Long eventId) {
+        return computeDynamicPrice(eventId);
+    }
+
+    // Tests use THIS
     @Override
     public DynamicPriceRecord computeDynamicPrice(Long eventId) {
 
         EventRecord event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
 
-        if (!Boolean.TRUE.equals(event.getActive())) {
+        if (!event.getActive()) {
             throw new BadRequestException("Event is not active");
         }
 
@@ -45,20 +54,21 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
                 .orElseThrow(() -> new RuntimeException("Seat inventory not found"));
 
         double price = event.getBasePrice();
-        List<PricingRule> rules = ruleRepo.findByActiveTrue();
+        int remaining = inv.getRemainingSeats();
+        long daysBeforeEvent =
+                LocalDate.now().until(event.getEventDate()).getDays();
 
-        long daysLeft =
-                ChronoUnit.DAYS.between(LocalDate.now(), event.getEventDate());
+        List<PricingRule> rules = ruleRepo.findByActiveTrue();
 
         StringBuilder applied = new StringBuilder();
 
-        for (PricingRule r : rules) {
-            if (inv.getRemainingSeats() >= r.getMinRemainingSeats()
-                    && inv.getRemainingSeats() <= r.getMaxRemainingSeats()
-                    && daysLeft <= r.getDaysBeforeEvent()) {
+        for (PricingRule rule : rules) {
+            if (remaining >= rule.getMinRemainingSeats()
+                    && remaining <= rule.getMaxRemainingSeats()
+                    && daysBeforeEvent <= rule.getDaysBeforeEvent()) {
 
-                price *= r.getPriceMultiplier();
-                applied.append(r.getRuleCode()).append(",");
+                price *= rule.getPriceMultiplier();
+                applied.append(rule.getRuleCode()).append(",");
             }
         }
 
@@ -70,7 +80,7 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
         record.setComputedPrice(price);
         record.setAppliedRuleCodes(applied.toString());
 
-        priceRepo.save(record);
+        DynamicPriceRecord saved = priceRepo.save(record);
 
         if (previous != null && previous.getComputedPrice() != price) {
             PriceAdjustmentLog log = new PriceAdjustmentLog();
@@ -80,7 +90,7 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
             logRepo.save(log);
         }
 
-        return record;
+        return saved;
     }
 
     @Override
