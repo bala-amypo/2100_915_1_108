@@ -10,40 +10,26 @@ public class PricingRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String ruleCode;
 
-    private String description;
     private Integer minRemainingSeats;
+
     private Integer maxRemainingSeats;
+
     private Integer daysBeforeEvent;
+
+    @Column(nullable = false)
     private Double priceMultiplier;
-    private Boolean active;
 
-    // No-arg constructor
-    public PricingRule() {
-    }
+    @Column(nullable = false)
+    private Boolean active = true;
 
-    // Parameterized constructor
-    public PricingRule(Long id, String ruleCode, String description,
-                       Integer minRemainingSeats, Integer maxRemainingSeats,
-                       Integer daysBeforeEvent, Double priceMultiplier, Boolean active) {
-        this.id = id;
-        this.ruleCode = ruleCode;
-        this.description = description;
-        this.minRemainingSeats = minRemainingSeats;
-        this.maxRemainingSeats = maxRemainingSeats;
-        this.daysBeforeEvent = daysBeforeEvent;
-        this.priceMultiplier = priceMultiplier;
-        this.active = active;
-    }
-
-    // Getters & Setters
+    // Getters and Setters
     public Long getId() {
         return id;
     }
 
-    // 🔴 THIS WAS MISSING – REQUIRED FOR COMPILATION
     public void setId(Long id) {
         this.id = id;
     }
@@ -54,14 +40,6 @@ public class PricingRule {
 
     public void setRuleCode(String ruleCode) {
         this.ruleCode = ruleCode;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Integer getMinRemainingSeats() {

@@ -11,39 +11,59 @@ public class DynamicPriceRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long eventId;
+
+    @Column(nullable = false)
     private Double computedPrice;
+
     private String appliedRuleCodes;
+
     private LocalDateTime computedAt;
-
-    // No-arg constructor
-    public DynamicPriceRecord() {}
-
-    // Parameterized constructor
-    public DynamicPriceRecord(Long id, Long eventId,
-                              Double computedPrice, String appliedRuleCodes) {
-        this.id = id;
-        this.eventId = eventId;
-        this.computedPrice = computedPrice;
-        this.appliedRuleCodes = appliedRuleCodes;
-    }
 
     @PrePersist
     public void prePersist() {
         this.computedAt = LocalDateTime.now();
     }
 
-    // Getters & Setters
-    public Long getId() { return id; }
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
 
-    public Long getEventId() { return eventId; }
-    public void setEventId(Long eventId) { this.eventId = eventId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Double getComputedPrice() { return computedPrice; }
-    public void setComputedPrice(Double computedPrice) { this.computedPrice = computedPrice; }
+    public Long getEventId() {
+        return eventId;
+    }
 
-    public String getAppliedRuleCodes() { return appliedRuleCodes; }
-    public void setAppliedRuleCodes(String appliedRuleCodes) { this.appliedRuleCodes = appliedRuleCodes; }
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
+    }
 
-    public LocalDateTime getComputedAt() { return computedAt; }
+    public Double getComputedPrice() {
+        return computedPrice;
+    }
+
+    public void setComputedPrice(Double computedPrice) {
+        this.computedPrice = computedPrice;
+    }
+
+    public String getAppliedRuleCodes() {
+        return appliedRuleCodes;
+    }
+
+    public void setAppliedRuleCodes(String appliedRuleCodes) {
+        this.appliedRuleCodes = appliedRuleCodes;
+    }
+
+    public LocalDateTime getComputedAt() {
+        return computedAt;
+    }
+
+    public void setComputedAt(LocalDateTime computedAt) {
+        this.computedAt = computedAt;
+    }
 }

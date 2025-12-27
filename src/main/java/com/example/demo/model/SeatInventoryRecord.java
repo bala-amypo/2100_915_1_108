@@ -11,22 +11,16 @@ public class SeatInventoryRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long eventId;
+
+    @Column(nullable = false)
     private Integer totalSeats;
+
+    @Column(nullable = false)
     private Integer remainingSeats;
+
     private LocalDateTime updatedAt;
-
-    // No-arg constructor
-    public SeatInventoryRecord() {}
-
-    // Parameterized constructor
-    public SeatInventoryRecord(Long id, Long eventId,
-                               Integer totalSeats, Integer remainingSeats) {
-        this.id = id;
-        this.eventId = eventId;
-        this.totalSeats = totalSeats;
-        this.remainingSeats = remainingSeats;
-    }
 
     @PrePersist
     @PreUpdate
@@ -34,17 +28,44 @@ public class SeatInventoryRecord {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters & Setters
-    public Long getId() { return id; }
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
 
-    public Long getEventId() { return eventId; }
-    public void setEventId(Long eventId) { this.eventId = eventId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Integer getTotalSeats() { return totalSeats; }
-    public void setTotalSeats(Integer totalSeats) { this.totalSeats = totalSeats; }
+    public Long getEventId() {
+        return eventId;
+    }
 
-    public Integer getRemainingSeats() { return remainingSeats; }
-    public void setRemainingSeats(Integer remainingSeats) { this.remainingSeats = remainingSeats; }
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public Integer getTotalSeats() {
+        return totalSeats;
+    }
+
+    public void setTotalSeats(Integer totalSeats) {
+        this.totalSeats = totalSeats;
+    }
+
+    public Integer getRemainingSeats() {
+        return remainingSeats;
+    }
+
+    public void setRemainingSeats(Integer remainingSeats) {
+        this.remainingSeats = remainingSeats;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
