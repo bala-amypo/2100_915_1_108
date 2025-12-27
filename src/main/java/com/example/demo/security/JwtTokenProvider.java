@@ -1,23 +1,23 @@
 package com.example.demo.security;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.Authentication;
 
-import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class JwtTokenProvider {
 
-    private final SecretKey secretKey;
+    private final String secret;
     private final long validityInMs;
     private final boolean someFlag;
 
-    // REQUIRED constructor (used directly in tests)
+    // REQUIRED constructor (used in tests)
     public JwtTokenProvider(String secret, long validityInMs, boolean someFlag) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+        this.secret = secret;
         this.validityInMs = validityInMs;
         this.someFlag = someFlag;
     }
@@ -40,11 +40,11 @@ public class JwtTokenProvider {
                 .setSubject(email)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
-    // Overloaded method used by controllers
+    // Used by controller
     public String generateToken(Long userId, String email, String role) {
 
         Map<String, Object> claims = new HashMap<>();
@@ -60,15 +60,14 @@ public class JwtTokenProvider {
                 .setSubject(email)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
+            Jwts.parser()
+                    .setSigningKey(secret)
                     .parseClaimsJws(token);
             return true;
         } catch (Exception ex) {
@@ -77,14 +76,15 @@ public class JwtTokenProvider {
     }
 
     public String getUsernameFromToken(String token) {
-        return getAllClaims(token).get("email", String.class);
+        return getAllClaims(token).get("email").toString();
     }
 
     public Map<String, Object> getAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
+        Claims claims = Jwts.parser()
+                .setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody();
+
+        return new HashMap<>(claims);
     }
 }
