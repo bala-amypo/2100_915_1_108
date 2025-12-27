@@ -10,6 +10,7 @@ public class HelloServlet extends HttpServlet {
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        resp.getWriter().write("Hello World");
+        resp.setContentType("text/plain");
+        resp.getWriter().write("Hello from Dynamic Event Ticket Pricing Servlet");
     }
 }
