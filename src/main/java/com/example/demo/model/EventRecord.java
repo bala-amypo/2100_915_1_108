@@ -1,53 +1,24 @@
 package com.example.demo.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "event_records")
 public class EventRecord {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true)
     private String eventCode;
-
     private String eventName;
     private String venue;
     private LocalDate eventDate;
     private Double basePrice;
-    private Boolean active;
-
-    private LocalDateTime createdAt;
-
-    public EventRecord() {
-    }
-
-    public EventRecord(Long id, String eventCode, String eventName,
-                       String venue, LocalDate eventDate,
-                       Double basePrice, Boolean active) {
-        this.id = id;
-        this.eventCode = eventCode;
-        this.eventName = eventName;
-        this.venue = venue;
-        this.eventDate = eventDate;
-        this.basePrice = basePrice;
-        this.active = active;
-    }
+    private Boolean active = true;
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        if (this.active == null) {
-            this.active = true;
-        }
+        if (active == null) active = true;
     }
 
-    // Getters and Setters
-
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -68,6 +39,4 @@ public class EventRecord {
 
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
 }
