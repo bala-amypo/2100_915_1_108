@@ -17,31 +17,26 @@ public class DynamicPricingController {
         this.service = service;
     }
 
-    // ✅ Calculate dynamic price for an event
-    @PostMapping("/calculate/{eventId}")
-    public ResponseEntity<DynamicPriceRecord> calculatePrice(
+    @PostMapping("/compute/{eventId}")
+    public ResponseEntity<DynamicPriceRecord> computePrice(
             @PathVariable Long eventId) {
-
-        return ResponseEntity.ok(
-                service.calculateDynamicPrice(eventId)
-        );
+        return ResponseEntity.ok(service.computeDynamicPrice(eventId));
     }
 
-    // ✅ Get all computed prices
-    @GetMapping("/all")
-    public ResponseEntity<List<DynamicPriceRecord>> getAllPrices() {
-        return ResponseEntity.ok(
-                service.getAllComputedPrices()
-        );
+    @GetMapping("/latest/{eventId}")
+    public ResponseEntity<DynamicPriceRecord> getLatestPrice(
+            @PathVariable Long eventId) {
+        return ResponseEntity.ok(service.getLatestPrice(eventId));
     }
 
-    // ✅ Get price history for an event
     @GetMapping("/history/{eventId}")
     public ResponseEntity<List<DynamicPriceRecord>> getPriceHistory(
             @PathVariable Long eventId) {
+        return ResponseEntity.ok(service.getPriceHistory(eventId));
+    }
 
-        return ResponseEntity.ok(
-                service.getPriceHistory(eventId)
-        );
+    @GetMapping
+    public ResponseEntity<List<DynamicPriceRecord>> getAllComputedPrices() {
+        return ResponseEntity.ok(service.getAllComputedPrices());
     }
 }
