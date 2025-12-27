@@ -1,57 +1,49 @@
 package com.example.demo.security;
 
-import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
-import org.springframework.security.core.userdetails.*;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.User;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
-@Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private UserRepository userRepository;
+    private static final Map<String, Map<String, Object>> USERS = new HashMap<>();
+    private static final AtomicLong ID_GEN = new AtomicLong(1);
 
-    // ✅ REQUIRED NO-ARG CONSTRUCTOR (for tests)
-    public CustomUserDetailsService() {
-    }
-
-    // ✅ EXISTING CONSTRUCTOR (Spring will use this)
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole())
-                .build();
-    }
-
-    // ✅ REQUIRED BY TESTS
+    // Used directly by tests
     public Map<String, Object> registerUser(
             String fullName,
             String email,
             String password,
             String role) {
 
-        User user = new User();
-        user.setFullName(fullName);
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setRole(role);
+        Map<String, Object> user = new HashMap<>();
+        user.put("userId", ID_GEN.getAndIncrement());
+        user.put("fullName", fullName);
+        user.put("email", email);
+        user.put("password", password);
+        user.put("role", role);
 
-        userRepository.save(user);
+        USERS.put(email, user);
+        return user;
+    }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("email", email);
-        response.put("role", role);
-        return response;
+    @Override
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
+
+        Map<String, Object> user = USERS.get(email);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        return User.withUsername(email)
+                .password((String) user.get("password"))
+                .roles(((String) user.get("role")))
+                .build();
     }
 }
