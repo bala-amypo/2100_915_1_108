@@ -18,17 +18,21 @@ public class PricingRuleServiceImpl implements PricingRuleService {
 
     @Override
     public PricingRule createRule(PricingRule rule) {
+
         if (repository.existsByRuleCode(rule.getRuleCode())) {
             throw new BadRequestException("Price multiplier must be > 0");
         }
+
         if (rule.getPriceMultiplier() == null || rule.getPriceMultiplier() <= 0) {
             throw new BadRequestException("Price multiplier must be > 0");
         }
+
         return repository.save(rule);
     }
 
     @Override
     public PricingRule updateRule(Long id, PricingRule updatedRule) {
+        // ID setter NOW EXISTS, so this is SAFE
         updatedRule.setId(id);
         return repository.save(updatedRule);
     }
