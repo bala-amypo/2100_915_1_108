@@ -1,90 +1,78 @@
 package com.example.demo.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.Authentication;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 
+import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class JwtTokenProvider {
 
-    private final String secret;
+    private final Key key;
     private final long validityInMs;
-    private final boolean someFlag;
+    private final boolean enabled;
 
-    // REQUIRED constructor (used in tests)
-    public JwtTokenProvider(String secret, long validityInMs, boolean someFlag) {
-        this.secret = secret;
+    public JwtTokenProvider(String secret, long validityInMs, boolean enabled) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.validityInMs = validityInMs;
-        this.someFlag = someFlag;
+        this.enabled = enabled;
     }
 
-    // Used in security tests
-    public String generateToken(Authentication authentication, Long userId, String role) {
+    public String generateToken(String username, String role, Long userId) {
 
-        String email = authentication.getName();
+        if (!enabled) return null;
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
+        Claims claims = Jwts.claims().setSubject(username);
         claims.put("role", role);
-        claims.put("email", email);
+        claims.put("userId", userId);
 
         Date now = new Date();
         Date expiry = new Date(now.getTime() + validityInMs);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(email)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
-    }
-
-    // Used by controller
-    public String generateToken(Long userId, String email, String role) {
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);
-        claims.put("role", role);
-        claims.put("email", email);
-
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + validityInMs);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(email)
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(SignatureAlgorithm.HS256, secret)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .setSigningKey(secret)
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (Exception ex) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
 
-    public String getUsernameFromToken(String token) {
-        return getAllClaims(token).get("email").toString();
+    public String getUsername(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
-    public Map<String, Object> getAllClaims(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(secret)
+    public String getRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
                 .parseClaimsJws(token)
-                .getBody();
+                .getBody()
+                .get("role", String.class);
+    }
 
-        return new HashMap<>(claims);
+    public Long getUserId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId", Long.class);
     }
 }
