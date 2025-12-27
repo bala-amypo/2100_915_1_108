@@ -2,41 +2,35 @@ package com.example.demo.controller;
 
 import com.example.demo.model.PriceAdjustmentLog;
 import com.example.demo.service.PriceAdjustmentLogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/price-adjustments")
+@Tag(name = "Price Adjustments", description = "Price adjustment log endpoints")
+@SecurityRequirement(name = "Bearer Authentication")
 public class PriceAdjustmentLogController {
 
-    private final PriceAdjustmentLogService service;
-
-    public PriceAdjustmentLogController(PriceAdjustmentLogService service) {
-        this.service = service;
-    }
-
-    @PostMapping
-    public PriceAdjustmentLog create(@RequestBody PriceAdjustmentLog log) {
-        return service.logAdjustment(log);
-    }
+    @Autowired
+    private PriceAdjustmentLogService priceAdjustmentLogService;
 
     @GetMapping("/event/{eventId}")
-    public List<PriceAdjustmentLog> getByEvent(@PathVariable Long eventId) {
-        return service.getAdjustmentsByEvent(eventId);
+    @Operation(summary = "Get price adjustments for an event")
+    public ResponseEntity<List<PriceAdjustmentLog>> getAdjustmentsByEvent(@PathVariable Long eventId) {
+        List<PriceAdjustmentLog> adjustments = priceAdjustmentLogService.getAdjustmentsByEvent(eventId);
+        return ResponseEntity.ok(adjustments);
     }
 
-    @GetMapping
-    public List<PriceAdjustmentLog> getAll() {
-        return service.getAllAdjustments();
-    }
-
-    @GetMapping("/{id}")
-    public PriceAdjustmentLog getById(@PathVariable Long id) {
-        return service.getAllAdjustments()
-                .stream()
-                .filter(l -> l.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+    @GetMapping("/all")
+    @Operation(summary = "Get all price adjustments")
+    public ResponseEntity<List<PriceAdjustmentLog>> getAllAdjustments() {
+        List<PriceAdjustmentLog> adjustments = priceAdjustmentLogService.getAllAdjustments();
+        return ResponseEntity.ok(adjustments);
     }
 }
