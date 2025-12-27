@@ -1,49 +1,36 @@
 package com.example.demo.security;
 
+import com.example.demo.model.User;
+import com.example.demo.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
 
+@Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private static final Map<String, Map<String, Object>> USERS = new HashMap<>();
-    private static final AtomicLong ID_GEN = new AtomicLong(1);
+    private final UserRepository userRepository;
 
-    // Used directly by tests
-    public Map<String, Object> registerUser(
-            String fullName,
-            String email,
-            String password,
-            String role) {
-
-        Map<String, Object> user = new HashMap<>();
-        user.put("userId", ID_GEN.getAndIncrement());
-        user.put("fullName", fullName);
-        user.put("email", email);
-        user.put("password", password);
-        user.put("role", role);
-
-        USERS.put(email, user);
-        return user;
+    public CustomUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        Map<String, Object> user = USERS.get(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found: " + email));
 
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-
-        return User.withUsername(email)
-                .password((String) user.get("password"))
-                .roles(((String) user.get("role")))
-                .build();
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority(user.getRole()))
+        );
     }
 }
