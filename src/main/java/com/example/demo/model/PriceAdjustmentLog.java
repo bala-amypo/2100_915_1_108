@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "price_adjustment_logs")
 public class PriceAdjustmentLog {
 
     @Id
@@ -15,31 +14,14 @@ public class PriceAdjustmentLog {
     private Double oldPrice;
     private Double newPrice;
     private String reason;
-
     private LocalDateTime changedAt;
-
-    public PriceAdjustmentLog() {
-    }
-
-    public PriceAdjustmentLog(Long id, Long eventId,
-                              Double oldPrice, Double newPrice,
-                              String reason) {
-        this.id = id;
-        this.eventId = eventId;
-        this.oldPrice = oldPrice;
-        this.newPrice = newPrice;
-        this.reason = reason;
-    }
 
     @PrePersist
     public void prePersist() {
         this.changedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
-
     public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 
     public Long getEventId() { return eventId; }
     public void setEventId(Long eventId) { this.eventId = eventId; }

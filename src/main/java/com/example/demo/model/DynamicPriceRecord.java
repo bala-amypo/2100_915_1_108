@@ -1,9 +1,14 @@
 package com.example.demo.model;
 
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
 public class DynamicPriceRecord {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private Long eventId;
     private Double computedPrice;
@@ -12,10 +17,11 @@ public class DynamicPriceRecord {
 
     @PrePersist
     public void prePersist() {
-        computedAt = LocalDateTime.now();
+        this.computedAt = LocalDateTime.now();
     }
 
-    // getters & setters
+    public Long getId() { return id; }
+
     public Long getEventId() { return eventId; }
     public void setEventId(Long eventId) { this.eventId = eventId; }
 

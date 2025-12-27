@@ -1,24 +1,32 @@
 package com.example.demo.model;
 
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Entity
 public class EventRecord {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String eventCode;
     private String eventName;
     private String venue;
     private LocalDate eventDate;
     private Double basePrice;
-    private Boolean active = true;
+    private LocalDateTime createdAt;
+    private Boolean active;
 
     @PrePersist
     public void prePersist() {
-        if (active == null) active = true;
+        this.createdAt = LocalDateTime.now();
+        if (this.active == null) this.active = true;
     }
 
-    // getters & setters
+    // getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -36,6 +44,8 @@ public class EventRecord {
 
     public Double getBasePrice() { return basePrice; }
     public void setBasePrice(Double basePrice) { this.basePrice = basePrice; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
