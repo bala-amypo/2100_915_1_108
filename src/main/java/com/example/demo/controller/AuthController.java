@@ -1,68 +1,72 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
+import com.example.demo.security.CustomUserDetailsService;
 import com.example.demo.security.JwtTokenProvider;
-import com.example.demo.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    private final PasswordEncoder passwordEncoder;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    public AuthController(UserService userService,
+    public AuthController(AuthenticationManager authenticationManager,
                           JwtTokenProvider jwtTokenProvider,
-                          PasswordEncoder passwordEncoder) {
-        this.userService = userService;
+                          CustomUserDetailsService customUserDetailsService) {
+        this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.passwordEncoder = passwordEncoder;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
+    // ✅ Register user
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestParam String email,
-                                      @RequestParam String password) {
+    public ResponseEntity<Map<String, Object>> register(
+            @RequestParam String name,
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam String role) {
 
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+        Map<String, Object> user =
+                customUserDetailsService.registerUser(name, email, password, role);
 
-        userService.registerUser(user);
-
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok(user);
     }
 
+    // ✅ Login & generate JWT
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String email,
-                                   @RequestParam String password) {
+    public ResponseEntity<Map<String, Object>> login(
+            @RequestParam String email,
+            @RequestParam String password) {
 
-        Optional<User> optionalUser = userService.findByEmail(email);
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(email, password)
+                );
 
-        if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-
-        User user = optionalUser.get();
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
+        Map<String, Object> user =
+                customUserDetailsService.getUserByEmail(email);
 
         String token =
-                jwtTokenProvider.generateToken(user.getEmail(), user.getId());
+                jwtTokenProvider.generateToken(
+                        authentication,
+                        (Long) user.get("userId"),
+                        (String) user.get("role")
+                );
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-        response.put("userId", user.getId());
-        response.put("email", user.getEmail());
+        response.put("userId", user.get("userId"));
+        response.put("role", user.get("role"));
+        response.put("email", email);
 
         return ResponseEntity.ok(response);
     }
