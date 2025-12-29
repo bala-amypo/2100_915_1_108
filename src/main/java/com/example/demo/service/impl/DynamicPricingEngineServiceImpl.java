@@ -39,23 +39,20 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
 
     @Override
     public DynamicPriceRecord computeDynamicPrice(Long eventId) {
-        // Get event
+        
         EventRecord event = eventRecordRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId));
 
-        // Check if event is active
         if (!event.getActive()) {
             throw new BadRequestException("Event is not active");
         }
-
-        // Get seat inventory
         SeatInventoryRecord inventory = seatInventoryRecordRepository.findByEventId(eventId)
                 .orElseThrow(() -> new NotFoundException("Seat inventory not found for event: " + eventId));
 
-        // Calculate days before event
+        
         long daysBeforeEvent = ChronoUnit.DAYS.between(LocalDate.now(), event.getEventDate());
 
-        // Get active pricing rules
+        
         List<PricingRule> activeRules = pricingRuleRepository.findByActiveTrue();
 
         // Find applicable rules

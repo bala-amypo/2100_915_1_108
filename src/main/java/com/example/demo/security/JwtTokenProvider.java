@@ -24,12 +24,10 @@ public class JwtTokenProvider {
     private long jwtExpirationMs;
 
     public JwtTokenProvider() {
-        // Default constructor for Spring
     }
 
-    // Constructor for testing - ensures key is at least 64 characters
     public JwtTokenProvider(String jwtSecret, Long jwtExpirationMs, Boolean enableJwt) {
-        // Pad the key if it's too short
+        
         if (jwtSecret != null && jwtSecret.length() < 64) {
             this.jwtSecret = jwtSecret + "0".repeat(64 - jwtSecret.length());
         } else {
