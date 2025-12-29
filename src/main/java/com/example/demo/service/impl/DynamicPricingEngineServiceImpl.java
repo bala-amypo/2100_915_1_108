@@ -55,7 +55,7 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
         
         List<PricingRule> activeRules = pricingRuleRepository.findByActiveTrue();
 
-        // Find applicable rules
+       
         List<PricingRule> applicableRules = new ArrayList<>();
         for (PricingRule rule : activeRules) {
             boolean seatsMatch = (rule.getMinRemainingSeats() == null || inventory.getRemainingSeats() >= rule.getMinRemainingSeats()) &&
@@ -68,7 +68,7 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
             }
         }
 
-        // Calculate price
+        
         double computedPrice = event.getBasePrice();
         StringBuilder appliedRuleCodes = new StringBuilder();
         
@@ -80,18 +80,16 @@ public class DynamicPricingEngineServiceImpl implements DynamicPricingEngineServ
             appliedRuleCodes.append(rule.getRuleCode());
         }
 
-        // Get previous price
         Optional<DynamicPriceRecord> previousPriceOpt = 
                 dynamicPriceRecordRepository.findFirstByEventIdOrderByComputedAtDesc(eventId);
 
-        // Create new price record
+      
         DynamicPriceRecord priceRecord = new DynamicPriceRecord();
         priceRecord.setEventId(eventId);
         priceRecord.setComputedPrice(computedPrice);
         priceRecord.setAppliedRuleCodes(appliedRuleCodes.toString());
         priceRecord = dynamicPriceRecordRepository.save(priceRecord);
 
-        // Log price adjustment if price changed
         if (previousPriceOpt.isPresent()) {
             DynamicPriceRecord previousPrice = previousPriceOpt.get();
             if (!previousPrice.getComputedPrice().equals(computedPrice)) {

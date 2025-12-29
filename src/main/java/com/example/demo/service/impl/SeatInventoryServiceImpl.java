@@ -26,14 +26,13 @@ public class SeatInventoryServiceImpl implements SeatInventoryService {
 
     @Override
 public SeatInventoryRecord createInventory(SeatInventoryRecord inventory) {
-    // Validate remaining seats
+   
     if (inventory.getRemainingSeats() > inventory.getTotalSeats()) {
         throw new BadRequestException("Remaining seats cannot exceed total seats");
     }
     
-    // Validate event exists (optional - only if event repository has the event)
     if (inventory.getEventId() != null && eventRecordRepository.existsById(inventory.getEventId())) {
-        // Event exists, proceed
+        
     }
     
     return seatInventoryRecordRepository.save(inventory);
