@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
-    // ✅ Constructor Injection (MANDATORY for tests)
+    // ✅ Constructor Injection (MANDATORY)
     public AuthController(
             UserService userService,
             JwtTokenProvider jwtTokenProvider,
@@ -42,7 +43,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<String>> register(
             @Valid @RequestBody User user) {
 
-        if (userService.existsByEmail(user.getEmail())) {
+        if (userService.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse<>(false, "Email already exists"));
         }
@@ -59,14 +60,21 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody AuthRequest request) {
 
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
 
-        String token = jwtTokenProvider.generateToken(request.getUsername());
+        User user = userService.findByEmail(request.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String token = jwtTokenProvider.generateToken(
+                authentication,
+                user.getId(),
+                user.getRole()
+        );
 
         return ResponseEntity.ok(
                 new ApiResponse<>(
