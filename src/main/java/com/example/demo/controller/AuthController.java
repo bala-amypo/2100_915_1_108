@@ -1,83 +1,43 @@
-
-
 package com.example.demo.controller;
 
-import com.example.demo.security.CustomUserDetailsService;
-import com.example.demo.security.JwtTokenProvider;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import com.example.demo.dto.ApiResponse;
+import com.example.demo.dto.AuthRequest;
+import com.example.demo.dto.AuthResponse;
+import com.example.demo.service.AuthService;
 
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "Authentication endpoints")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthService authService;
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
-    @Operation(summary = "Register a new user")
-    public ResponseEntity<?> registerUser(@RequestBody Map<String, String> request) {
-        String name = request.get("name");
-        String email = request.get("email");
-        String password = request.get("password");
-        String role = request.getOrDefault("role", "USER");
+    public ResponseEntity<ApiResponse<String>> registerUser(
+            @Valid @RequestBody AuthRequest request) {
 
-        String encodedPassword = passwordEncoder.encode(password);
-        Map<String, Object> user = userDetailsService.registerUser(name, email, encodedPassword, role);
+        authService.register(request);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "User registered successfully");
-        response.put("userId", user.get("userId"));
-        response.put("email", email);
-        response.put("role", role);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "User registered successfully")
+        );
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login and get JWT token")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String password = request.get("password");
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
+            @Valid @RequestBody AuthRequest request) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
+        AuthResponse response = authService.login(request);
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Login successful", response)
         );
-
-        Map<String, Object> user = userDetailsService.getUserByEmail(email);
-        String token = jwtTokenProvider.generateToken(
-                authentication,
-                (Long) user.get("userId"),
-                (String) user.get("role")
-        );
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", token);
-        response.put("type", "Bearer");
-        response.put("userId", user.get("userId"));
-        response.put("email", email);
-        response.put("role", user.get("role"));
-
-        return ResponseEntity.ok(response);
     }
 }
