@@ -25,8 +25,6 @@ public class DynamicPriceRecord {
     public void prePersist() {
         this.computedAt = LocalDateTime.now();
     }
-
-    // Getters and Setters
     public Long getId() {
         return id;
     }

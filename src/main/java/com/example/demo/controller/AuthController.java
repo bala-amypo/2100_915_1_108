@@ -33,7 +33,6 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // ================= REGISTER =================
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
     public ResponseEntity<?> register(@RequestBody AuthRequest request) {
@@ -53,7 +52,6 @@ public class AuthController {
         );
     }
 
-    // ================= LOGIN =================
     @PostMapping("/login")
     @Operation(summary = "Login and get JWT token")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
